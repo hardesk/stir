@@ -16,9 +16,6 @@
 [submodule "externals/benchmark"]
 	path = externals/benchmark
 	url = git@github.com:hardesk/build2-benchmark.git
-[submodule "lua"]
-	path = lua
-	url = git@github.com:hardesk/build2-lua.git
 [submodule "externals/lua"]
 	path = externals/lua
 	url = git@github.com:hardesk/build2-lua.git
