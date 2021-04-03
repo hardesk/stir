@@ -1,0 +1,25 @@
+# config.bin.lib = shared static
+
+import LIBS = lua%lib{lua} benchmark%liba{benchmark} liba{stir}
+
+incl_libs = ../externals/fmt/fmt \
+			../externals/doctest/doctest \
+			../externals/imgui/imgui \
+			../externals/spdlog/spdlog \
+			../externals/xsimd/xsimd \
+			../externals/mipp/mipp \
+			../externals/nanobench/nanobench
+
+#import stir%liba{../stir}
+
+exe{stir_tests} : cxx{main} cxx{*.tests... -hash.test.cpp} $LIBS lib{$incl_libs}
+#info "in buildfile, src_root: $src_root, src_base: $src_base, out_base: $out_base, out_root: $out_root"
+
+exe{stir_bench} : cxx{benchmark} cxx{*.benchmark...} $LIBS lib{$incl_libs}
+
+./: exe{stir_tests stir_bench}
+
+#exe{stir_tests} : cxx{*} lib{../stir}
+#	cxx.poptions += "-DSPDLOG_FMT_EXTERNAL"
+#	bin.rpath += "@executable_path/../__eex/lib"
+#	cxx.libs += -llua -lfmt
