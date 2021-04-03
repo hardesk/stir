@@ -19,3 +19,9 @@
 [submodule "externals/lua"]
 	path = externals/lua
 	url = git@github.com:hardesk/build2-lua.git
+[submodule "externals/mipp"]
+	path = externals/mipp
+	url = git@github.com:aff3ct/MIPP.git
+[submodule "externals/nanobench"]
+	path = externals/nanobench
+	url = git@github.com:martinus/nanobench.git

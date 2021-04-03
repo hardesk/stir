@@ -39,6 +39,31 @@ xsimd/
 	}
 }
 
+mipp/
+{
+	hxx{*}: extension = h
+
+	lib{mipp}: src/hxx{mipp}
+	{
+		cxx.export.poptions = "-I$src_base/src"
+	}
+
+	src/hxx{*}:
+	{
+		install.subdirs = true
+	}
+
+}
+
+nanobench/
+{
+	hxx{*}: extension = h
+	lib{nanobench}: src/include/hxx{nanobench}
+	{
+		cxx.export.poptions = "-I$src_base/src/include"
+	}
+}
+
 fmt/
 {
 	hxx{*}: extension = h
