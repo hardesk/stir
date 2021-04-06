@@ -67,8 +67,12 @@ inline quat from_axis_angle(vec3 const& v, float a)
 	return quat (v.x*sa, v.y*sa, v.z*sa, ca);
 }
 
+inline float dot(quat const& a, quat const& b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
+quat exp(quat const& a);
+quat log(quat const& a);
 quat mul(quat const& a, quat const& b);
 //vec3 rot(vec3 const& v, quat const& q);
+
 matrix mul(matrix const& a, matrix const& b);
 vec4 mul(vec4 const& v, matrix const& a);
 

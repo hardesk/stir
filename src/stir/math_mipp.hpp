@@ -2,6 +2,12 @@
 
 #include <mipp.h>
 
+#define Ax (&a.x)
+#define Bx (&b.x)
+#define Tx (&this->x)
+#define Xx(a) (&a.x)
+
+
 /*
 // extension to mipp
 namespace mipp
@@ -89,12 +95,42 @@ inline float sq_length(quat const& a) { return impl::sql4(S(Ax)); }
 
 inline vec2 normalize(vec2 const& a) { return vec2(impl::n4(S{a.x, a.y, 0, 0})); }
 inline vec3 normalize(vec3 const& a) { return vec3(impl::n4(S{a.x, a.y, a.z, 0})); }
-inline vec4 normalize(vec4 const& a) { return impl::n4(S(Ax)); }
+inline vec4 normalize(vec4 const& a) { return vec4(impl::n4(S(Ax))); }
 inline quat normalize(quat const& a) { return quat(impl::n4(S(Ax))); }
 
 inline S as_simd(vec3 const& a, float w = 0.0f) { return S({a.x, a.y, a.z, w}); }
 inline S as_simd(vec4 const& a) { return S({a.x, a.y, a.z, a.w}); }
 inline S as_simd(quat const& a) { return S({a.x, a.y, a.z, a.w}); }
+//inline S load_v3_0(quat const& a) { return S s(&a.x); a[3]=0; return s; }
+
+inline vec2 operator+(vec2 const& a, vec2 const& b) { return vec2(a.x+b.x, a.y+b.y); }
+inline vec3 operator+(vec3 const& a, vec3 const& b) { return vec3(as_simd(a)+as_simd(b)); }
+inline vec4 operator+(vec4 const& a, vec4 const& b) { return vec4(as_simd(a)+as_simd(b)); }
+inline quat operator+(quat const& a, quat const& b) { return quat(as_simd(a)+as_simd(b)); }
+inline vec2 operator+(vec2 const& a, float b) { return vec2(a.x+b, a.y+b); }
+inline vec3 operator+(vec3 const& a, float b) { return vec3(as_simd(a)+S(b)); }
+inline vec4 operator+(vec4 const& a, float b) { return vec4(as_simd(a)+S(b)); }
+inline quat operator+(quat const& a, float b) { return quat(as_simd(a)+S(b)); }
+
+inline vec2 operator-(vec2 const& a, vec2 const& b) { return vec2(a.x-b.x, a.y-b.y); }
+inline vec3 operator-(vec3 const& a, vec3 const& b) { return vec3(as_simd(a)-as_simd(b)); }
+inline vec4 operator-(vec4 const& a, vec4 const& b) { return vec4(as_simd(a)-as_simd(b)); }
+inline quat operator-(quat const& a, quat const& b) { return quat(as_simd(a)-as_simd(b)); }
+inline vec2 operator-(vec2 const& a, float b) { return vec2(a.x-b, a.y-b); }
+inline vec3 operator-(vec3 const& a, float b) { return vec3(as_simd(a)-S(b)); }
+inline vec4 operator-(vec4 const& a, float b) { return vec4(as_simd(a)-S(b)); }
+inline quat operator-(quat const& a, float b) { return quat(as_simd(a)-S(b)); }
+
+inline vec2 operator*(vec2 const& a, float b) { return vec2(a.x*b, a.y*b); }
+inline vec3 operator*(vec3 const& a, float b) { return vec3(as_simd(a)*S(b)); }
+inline vec4 operator*(vec4 const& a, float b) { return vec4(as_simd(a)*S(b)); }
+inline quat operator*(quat const& a, float b) { return quat(as_simd(a)*S(b)); }
+
+inline vec2 operator/(vec2 const& a, float b) { return vec2(a.x/b, a.y/b); }
+inline vec3 operator/(vec3 const& a, float b) { return vec3(as_simd(a)/S(b)); }
+inline vec4 operator/(vec4 const& a, float b) { return vec4(as_simd(a)/S(b)); }
+inline quat operator/(quat const& a, float b) { return quat(as_simd(a)/S(b)); }
+
 
 inline bool operator==(vec3 const& a, vec3 const& b) {
 	S s1=as_simd(a), s2=as_simd(b);
@@ -104,11 +140,6 @@ inline bool operator==(vec3 const& a, vec3 const& b) {
 	return sum == -4;
 }
 
-
-inline vec4 operator+(vec4 const& a, vec4 const& b) {
-	S s1(Ax), s2(Bx);
-	return vec4(s1 + s2);
-}
 
 inline bool operator==(vec4 const& a, vec4 const& b) {
 	S s1(Ax), s2(Bx);
@@ -124,14 +155,14 @@ inline bool operator==(quat const& a, quat const& b) {
 	int sum = s.hadd();
 	return sum == -4;
 }
-inline quat operator+(quat const& a, quat const& b) { S s1(Ax), s2(Bx); return quat(s1+s2); }
-inline quat operator-(quat const& a, quat const& b) { S s1(Ax), s2(Bx); return quat(s1-s2); }
+//inline quat operator+(quat const& a, quat const& b) { S s1(Ax), s2(Bx); return quat(s1+s2); }
+//inline quat operator-(quat const& a, quat const& b) { S s1(Ax), s2(Bx); return quat(s1-s2); }
 
 inline quat conj(quat const& a)
 {
 	S q(Ax);
 	M m{false,false,false,true};
-	return q.neg(m);
+	return quat(q.neg(m));
 }
 
 inline quat from_axis_angle(vec3 const& axis, float angle)
@@ -153,24 +184,6 @@ inline quat from_axis_angle(vec3 const& axis, float angle)
 
 inline quat mul(quat const& a, quat const& b)
 {
-#if 0
-	return mul_ref(a, b);
-#else
-
-//#define _mm_shufpsd(r,i) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(aa), i))
-#define _mm_shufpsd(r,i) _mm_shuffle_ps(r, r, i)
-
-#if STIR_MATH_X64
-	// note: _MM_SHUFFLE index 0 is right-most (least significant little endian), so x:0 y:1 z:2 w:3
-	__m128 aa = as_simd(a).r;
-	__m128 a3 = _mm_shufpsd(aa, 0xff), a0 = _mm_shufpsd(aa, 0x00), a1 = _mm_shufpsd(aa, 0x55), a2 = _mm_shufpsd(aa, 0xaa);
-	
-	__m128 bb = as_simd(b).r;
-	__m128 bs0 = _mm_shufpsd(bb, _MM_SHUFFLE(2,3,0,1)); 
-	__m128 bs1 = _mm_shufpsd(bb, _MM_SHUFFLE(1,0,3,2));
-	__m128 bs2 = _mm_shufpsd(bb, _MM_SHUFFLE(2,0,3,1));
-	__m128 bs3 = _mm_shufpsd(bb, _MM_SHUFFLE(3,1,0,2));
-#else
 	S aa(Ax);
 	S a3(aa[3]), a0(aa[0]), a1(aa[1]), a2(aa[2]);
 
@@ -185,41 +198,7 @@ inline quat mul(quat const& a, quat const& b)
 	S q1 = a0 * bs1;
 	S q2 = a1 * bs2;
 	S q3 = a2 * bs3;
-#endif
-
-#if STIR_MATH_X64
-
-	// this is the original order, now let's rearrange columns so we get as much natural addsub as possible
-	// the order for MM_SHUFFLE below is reversed
-	// 0  1  2  3
-	// 3 -2  1 -0 
-	// 2  3 -0 -1
-	//-1  0  3 -2
-	
-	// 1  0  3  2 (order for bs0)
-	//-2  3 -0  1 (order for bs1)
-	
-	// 3  1  2  0 (new order for bs0/temp) prev pos = (2 0 3 1)
-	//-1  3 -0  2 (order for bs2)
-	
-	// 3  1  0  2 (new order for bs0/temp) prev pos = (0 1 3 2)
-	//-2  0 -1  3 (order for bs3)
-	
-	// reshufle into corect positions: (2 1 3 0)
-	__m128 q0 = _mm_mul_ps(a3, bs0);
-	__m128 q1 = _mm_mul_ps(a0, bs1);
-	__m128 q2 = _mm_mul_ps(a1, bs2);
-	__m128 q3 = _mm_mul_ps(a2, bs3);
-	
-	__m128 tq1 = _mm_shufpsd(_mm_addsub_ps(q0, q1), _MM_SHUFFLE(1,3,0,2));
-	__m128 tq2 = _mm_shufpsd(_mm_addsub_ps(tq1, q2), _MM_SHUFFLE(2,3,1,0));
-	__m128 tq3 = _mm_shufpsd(_mm_addsub_ps(tq2, q3), _MM_SHUFFLE(0,3,1,2));
-
-	return quat(tq3);
-#else
 	return quat(q0 + q1 + q2 + q3);
-#endif
-#endif
 }
 
 #define STIR_MATRIX_UN_OP(op) for(int i=0; i<4; ++i) { S q=S(x+i*4) op S(z.x+i*4); q.store(x+i*4); } return *this
@@ -279,6 +258,11 @@ inline matrix const& matrix::operator*=(matrix const& z) { STIR_MATRIX_UN_OP(*);
 inline matrix const& matrix::operator/=(matrix const& z) { STIR_MATRIX_UN_OP(/); }
 
 } 
+
+#undef Ax
+#undef Bx
+#undef Xx
+#undef Tx
 
 #include "math_common.hpp"
 

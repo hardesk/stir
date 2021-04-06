@@ -2,6 +2,8 @@
 #include <doctest/doctest.h>
 
 #include <stir/math.hpp>
+#include <stir/math_sse.hpp>
+#include <stir/math_xsimd.hpp>
 
 namespace bench = ankerl::nanobench;
 using namespace stir;
@@ -9,6 +11,13 @@ using namespace stir;
 bench::Rng r;
 float f11() { return r.uniform01()*2-1; }
 #define rF f11()
+
+quat __attribute__((noinline)) do_math(quat const& a)
+{
+	quat q=sse::mul(a,quat(2,1,3,0.2f));
+	q = sse::mul(a,a) + q / 4.f;
+	return q;
+}
 
 TEST_CASE("math vec benchmark")
 {
@@ -55,13 +64,24 @@ TEST_CASE("math quat benchmark")
 {
 	quat q(rF,rF,rF,rF);
 	quat q2(rF,rF,rF,rF);
+
+	bench::Bench().run("quat mul ref", [&] {
+		quat q1=ref::mul(q, q2);
+		bench::doNotOptimizeAway(q1);
+	});
+
 	bench::Bench().run("quat mul", [&] {
 		quat q1=mul(q, q2);
 		bench::doNotOptimizeAway(q1);
 	});
 
-	bench::Bench().run("quat mul ref", [&] {
-		quat q1=ref::mul(q, q2);
+	bench::Bench().run("quat mul (xsimd)", [&] {
+		quat q1=simd_xsimd::mul(q, q2);
+		bench::doNotOptimizeAway(q1);
+	});
+
+	bench::Bench().run("quat mul (sse)", [&] {
+		quat q1=sse::mul(q, q2);
 		bench::doNotOptimizeAway(q1);
 	});
 

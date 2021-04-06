@@ -12,7 +12,8 @@ incl_libs = ../externals/fmt/fmt \
 
 #import stir%liba{../stir}
 
-exe{stir_tests} : cxx{main} cxx{*.tests... -hash.test.cpp} $LIBS lib{$incl_libs}
+exe{stir_tests} : cxx{main} cxx{*.tests... -hash.test.cpp} $LIBS lib{$incl_libs} 
+# ../src/tests/cxx{*}
 #info "in buildfile, src_root: $src_root, src_base: $src_base, out_base: $out_base, out_root: $out_root"
 
 exe{stir_bench} : cxx{benchmark} cxx{*.benchmark...} $LIBS lib{$incl_libs}

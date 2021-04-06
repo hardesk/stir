@@ -13,6 +13,8 @@ inline vec3 rot(vec3 const& v, quat const& q)
 	return vec3(m.x, m.y, m.z);
 }
 
+inline float rsqrt(float a) { return 1.0f/sqrt(a); }
+
 }
 
 

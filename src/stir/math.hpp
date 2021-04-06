@@ -16,7 +16,6 @@
 #elif STIR_MATH_MODE == STIR_MATH_XSIMD
 #include "math_xsimd.hpp"
 #else
-// in case ref is backend is selected, include it here so 'common' sees the impl functions
 #include "math_ref.hpp"
 #endif
 
@@ -26,7 +25,7 @@
 // always (unless specifically disabled) include the reference implementation
 #include "math_ref.hpp"
 
-// Vector is interpreted as 1x4 (a row) when treated as a matrix.
+// Vector is interpreted as 1x4 (a row) matrix.
 // Thus vector/matrix multiplication happens as v * M
 
 namespace stir
@@ -39,25 +38,6 @@ namespace stir
 
 namespace stir
 {
-
-struct alignas(16) Matrix1
-{
-	/*template<typename... T>
-	Matrix1(T... args)
-		:	f{args...}
-	{}*/
-	float f[16];
-
-	void set(int i, float a, float b, float c, float d) { f[i*4+0] = a; f[i*4+1] = b; f[i*4+2] = c; f[i*4+3] = d; }
-	float operator()(int i, int j) const { return f[i*4+j]; }
-
-	Matrix1 const& operator+=(Matrix1 const& a)
-	{
-		for (int i=0; i<16; ++i)
-			f[i] += a.f[i];
-		return *this;
-	}
-};
 
 inline Vector4 mul_raw(Vector4 const& v, Matrix const& a)
 {
@@ -112,32 +92,6 @@ inline Vector3 mul3(Vector3 const& v, Matrix const& a)
 	BF4 r = v0*a.row[0] + v1*a.row[1] + v2*a.row[2];
 
 	return Vector3(r[0], r[1], r[2]);
-}
-
-inline Matrix mul_sse(Matrix const& a, Matrix const& b)
-{
-	Matrix r;
-
-	__m128i b0 = _mm_load_ps(b.el[0]);
-	__m128i b1 = _mm_load_ps(b.el[1]);
-	__m128i b2 = _mm_load_ps(b.el[2]);
-	__m128i b3 = _mm_load_ps(b.el[3]);
-
-	for (int i=0; i<4; ++i)
-	{
-		__m128i aa = _mm_load_ps(a.el[i]);
-		__m128i a0 = _mm_shuffle_ps(aa, aa, 0x00);
-		__m128i a1 = _mm_shuffle_ps(aa, aa, 0x55);
-		__m128i a2 = _mm_shuffle_ps(aa, aa, 0xaa);
-		__m128i a3 = _mm_shuffle_ps(aa, aa, 0xff);
-
-		__m128i rr = _mm_add_ps(
-				_mm_add_ps(_mm_mul_ps(a0, b0), _mm_mul_ps(a1, b1)),
-				_mm_add_ps(_mm_mul_ps(a2, b2), _mm_mul_ps(a3, b3))); 
-		_mm_store_ps(r.el[i], rr);
-	}
-
-	return r;
 }
 
 inline Matrix mul_xsimd_old(Matrix const& a, Matrix const& b)
@@ -197,26 +151,9 @@ inline Matrix mul_xsimd(Matrix const& a, Matrix const& b)
 	return m;
 }
 
-
-inline Matrix mul(Matrix const& a, Matrix const& b)
-{
-	return mul_xsimd(a, b);
-}
-
-inline xsimd::batch<float, 4> dos(xsimd::batch<float, 4> a)
-{
-	return xsimd::batch<float, 4>(a[2], a[1], a[1], a[3]);
-}
-
 }
 
 
 #endif // 0
-
-
-#undef Ax
-#undef Bx
-#undef Xx
-#undef Tx
 
 #endif

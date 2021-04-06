@@ -15,7 +15,7 @@ namespace stir {
 	using M = mipp::Msk<Sn>;
 }
 #elif STIR_MATH_MODE == STIR_MATH_XSIMD
-#include "math_xsimd.hpp"
+#include <xsimd/xsimd.hpp>
 namespace stir {
 	constexpr int Sn = 4;
 	using S = xsimd::batch<float, Sn>;
@@ -27,6 +27,10 @@ namespace stir {
 }
 #endif
 
+#define Ax (&a.x)
+#define Bx (&b.x)
+#define Tx (&this->x)
+#define Xx(a) (&a.x)
 
 namespace stir
 {
@@ -41,11 +45,6 @@ struct quat;
 struct matrix;
 template<class T> T pi = T(3.1415926535897932385);
 
-#define Ax (&a.x)
-#define Bx (&b.x)
-#define Tx (&this->x)
-#define Xx(a) (&a.x)
-
 namespace impl
 {
 inline S n4(S s);
@@ -56,7 +55,7 @@ inline float sql4(S a);
 struct vec2
 {
 	vec2() {}
-	vec2(S s);
+	explicit vec2(S s);
 	vec2(float x, float y) : x(x), y(y) {}
 
 	vec3 as_vec3(float z = 0);
@@ -72,7 +71,7 @@ static_assert(std::is_standard_layout<vec2>::value == true);
 struct vec3
 {
 	vec3() {}
-	vec3(S s);
+	explicit vec3(S s);
 	vec3(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
 
 	vec4 as_vec4(float w = 1.0f) const;
@@ -92,7 +91,7 @@ static_assert(std::is_standard_layout<vec3>::value == true);
 struct vec4
 {
 	vec4() {}
-	vec4(S a);
+	explicit vec4(S a);
 	vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
 	//bool operator==(vec4 const& a) const;
@@ -112,7 +111,7 @@ static_assert(std::is_standard_layout<vec4>::value == true);
 struct quat // w is the real component
 {
 	quat() {}
-	quat(S a);
+	explicit quat(S a);
 	quat(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
 	//quat conjugate() const;
@@ -122,11 +121,9 @@ struct quat // w is the real component
 	float operator[](int i) const { return Tx[i]; }
 	float& operator[](int i) { return Tx[i]; }
 
+	vec3 const& v() const { return *reinterpret_cast<vec3 const*>(&x); }
+	vec3& v() { return *reinterpret_cast<vec3*>(&x); }
 	void normalize();
-	//quat normalized() const;
-
-	//float length() const { return impl::l4(S(A)); }
-	//float sq_length() const { return impl::sql4(S(A)); }
 
 	//S as_simd() const { return S(A); }
 
@@ -196,6 +193,12 @@ struct matrix
 			0, 0, 0, 1);
    	}
 };
+
+#undef Ax
+#undef Bx
+#undef Xx
+#undef Tx
+
 
 
 }

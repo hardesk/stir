@@ -95,8 +95,29 @@ matrix rot_matrix(quat const& q)
 #endif
 }
 
-} // ref
+quat exp(quat const& a)
+{
+	// exp(q)=e^w * (cos|v| + v/|v|*sin|v|)
+	float ew=std::exp(a.w);
+	float l=length(a.v());
+	float cv=std::cosf(l);
+	float sv=std::sinf(l);
+	float m=ew/l;
+	return quat(a.x*m*sv, a.y*m*sv, a.z*m*sv, ew*cv);
+}
 
+quat log(quat const& a)
+{
+	// ln(q)=ln|q|+v/|v|arccos(a/|q|)
+	float lq=length(a);
+	float lv=length(a.v());
+	float ac=std::acos(a.w/lq);
+	float lnq=std::log(lq);
+	float m=1.0f/lv*ac;
+	return quat(a.x*m, a.y*m, a.z*m, lnq);
+}
+
+} // ref
 
 }
 

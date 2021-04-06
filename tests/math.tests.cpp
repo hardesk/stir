@@ -1,8 +1,14 @@
 #include <stir/math.hpp>
+#include <stir/math_sse.hpp>
 #include <stir/math_fmt.hpp>
 
 
 #include "doctest/doctest.h"
+
+
+int operator<=>(stir::quat const& q, doctest::Approx const& a) {
+	return 0;
+}
 
 using namespace stir;
 using namespace doctest;
@@ -57,6 +63,11 @@ quat __attribute__((noinline)) mul_q(quat const& a, quat const& b)
 	return stir::mul(a, b);
 }
 
+quat __attribute__((noinline)) mul_q_sse(quat const& a, quat const& b)
+{
+	return stir::sse::mul(a, b);
+}
+
 quat __attribute__((noinline)) norm_q(quat& a)
 {
 	quat qq=normalize(a);
@@ -65,10 +76,11 @@ quat __attribute__((noinline)) norm_q(quat& a)
 
 TEST_CASE("quat")
 {
+	quat q1234(1,2,3,4);
 	quat q1(1,0,0,0);
 	quat q11(1,1,1,1);
 	quat q_i = quat::identity();
-	quat q = from_axis_angle(vec3(1,1,1), 3.1415f/2);
+	quat q = from_axis_angle(vec3(0.5f,2.0f,1.0f), 3.1415f/2);
 	quat q_c = quat(1.0f, 2.0f, 3.0f, 4.0f);
 	quat q_n = quat(0.1825742f, 0.3651484f, 0.5477226f, 0.7302967f);
 
@@ -81,6 +93,13 @@ TEST_CASE("quat")
 		CHECK(qref == qm);
 
 		CHECK(mul_q(q, q1) == qref);
+
+		SUBCASE("sse")
+		{
+			quat qm_sse=stir::sse::mul(q, q1);
+			CHECK(qref == qm_sse);
+			//CHECK(mul_q_sse(q, q1) == qref);
+		}
 	}
 	
 	SUBCASE("length")
@@ -104,8 +123,12 @@ TEST_CASE("quat")
 		CHECK(length(a - q_n) == Approx(0));
 	}
 
+	SUBCASE("exp log") {
+		CHECK(ref::exp(q1234)==quat(-8.240026f, -16.480053f,  -24.72008f,  -45.0598f));
+		CHECK(ref::log(q1234)==quat( 0.20099117f, 0.40198234f,  0.6029735f,  1.7005987f));
+	}
 	norm_q(q);
-	printf("%s", &q);
+	//printf("%d", &q);
 }
 
 /*
@@ -142,12 +165,32 @@ TEST_CASE("vec2")
 TEST_CASE("vec3")
 {
 	vec3 v(0,3,4);
+	SUBCASE("eq") {
+		vec3 v1(0,3,4);
+		CHECK(v==v1);
+	}
+	SUBCASE("not eq") {
+		vec3 v1(1,3,4);
+		CHECK(v!=v1);
+	}
 	SUBCASE("normalization") {
 		vec3 nn(0, 0.6f, 0.8f);
 		v.normalize();
 		CHECK(v==nn);
 		//CHECK(v.normalized().as_simd()==nn.as_simd());
 		CHECK(normalize(v)==nn);
+	}
+	SUBCASE("add") {
+		vec3 x=v+vec3(1.0f,-1.0f,3.0f);
+		CHECK(x==vec3(1,2,7));
+		//x+=v;
+		//CHECK(x==vec3(1,5,11));
+	}
+	SUBCASE("sub") {
+		vec3 x=v-vec3(2.0f,1.0f,-4.0f);
+		CHECK(x==vec3(-2,2,8));
+		//x-=v;
+		//CHECK(x==vec3(-2,-1,-4));
 	}
 }
 
@@ -162,5 +205,7 @@ TEST_CASE("vec4")
 		CHECK(normalize(v)==nn);
 	}
 }
+
+
 
 
