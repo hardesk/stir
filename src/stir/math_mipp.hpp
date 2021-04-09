@@ -1,5 +1,4 @@
 #include "math_def.hpp"
-
 #include <mipp.h>
 
 #define Ax (&a.x)
@@ -52,6 +51,20 @@ inline
 #endif
 namespace simd_mipp {
 
+using S = mipp::Reg<float>;
+constexpr int Sn = mipp::N<float>();
+using M = mipp::Msk<Sn>;
+
+inline S as_simd(vec2 const& a, float z = 0.0f, float w = 0.0f) { return S({a.x, a.y, z, w}); }
+inline S as_simd(vec3 const& a, float w = 0.0f) { return S({a.x, a.y, a.z, w}); }
+inline S as_simd(vec4 const& a) { return S({a.x, a.y, a.z, a.w}); }
+inline S as_simd(quat const& a) { return S({a.x, a.y, a.z, a.w}); }
+//inline S load_v3_0(quat const& a) { return S s(&a.x); a[3]=0; return s; }
+inline vec2 as_vec2(S s) { return vec2(s[0], s[1]); }
+inline vec3 as_vec3(S s) { return vec3(s[0], s[1], s[2]); }
+inline vec4 as_vec4(S s) { return vec4(s[0], s[1], s[2], s[3]); }
+inline quat as_quat(S s) { return quat(s[0], s[1], s[2], s[3]); }
+
 namespace impl 
 {
 	inline S n4(S s) {
@@ -93,43 +106,39 @@ inline float sq_length(vec3 const& a) { return impl::sql4(S{a.x, a.y, a.z, 0}); 
 inline float sq_length(vec4 const& a) { return impl::sql4(S(Ax)); }
 inline float sq_length(quat const& a) { return impl::sql4(S(Ax)); }
 
-inline vec2 normalize(vec2 const& a) { return vec2(impl::n4(S{a.x, a.y, 0, 0})); }
-inline vec3 normalize(vec3 const& a) { return vec3(impl::n4(S{a.x, a.y, a.z, 0})); }
-inline vec4 normalize(vec4 const& a) { return vec4(impl::n4(S(Ax))); }
-inline quat normalize(quat const& a) { return quat(impl::n4(S(Ax))); }
+inline vec2 normalize(vec2 const& a) { return as_vec2(impl::n4(S{a.x, a.y, 0, 0})); }
+inline vec3 normalize(vec3 const& a) { return as_vec3(impl::n4(S{a.x, a.y, a.z, 0})); }
+inline vec4 normalize(vec4 const& a) { return as_vec4(impl::n4(S(Ax))); }
+inline quat normalize(quat const& a) { return as_quat(impl::n4(S(Ax))); }
 
-inline S as_simd(vec3 const& a, float w = 0.0f) { return S({a.x, a.y, a.z, w}); }
-inline S as_simd(vec4 const& a) { return S({a.x, a.y, a.z, a.w}); }
-inline S as_simd(quat const& a) { return S({a.x, a.y, a.z, a.w}); }
-//inline S load_v3_0(quat const& a) { return S s(&a.x); a[3]=0; return s; }
 
 inline vec2 operator+(vec2 const& a, vec2 const& b) { return vec2(a.x+b.x, a.y+b.y); }
-inline vec3 operator+(vec3 const& a, vec3 const& b) { return vec3(as_simd(a)+as_simd(b)); }
-inline vec4 operator+(vec4 const& a, vec4 const& b) { return vec4(as_simd(a)+as_simd(b)); }
-inline quat operator+(quat const& a, quat const& b) { return quat(as_simd(a)+as_simd(b)); }
+inline vec3 operator+(vec3 const& a, vec3 const& b) { return as_vec3(as_simd(a)+as_simd(b)); }
+inline vec4 operator+(vec4 const& a, vec4 const& b) { return as_vec4(as_simd(a)+as_simd(b)); }
+inline quat operator+(quat const& a, quat const& b) { return as_quat(as_simd(a)+as_simd(b)); }
 inline vec2 operator+(vec2 const& a, float b) { return vec2(a.x+b, a.y+b); }
-inline vec3 operator+(vec3 const& a, float b) { return vec3(as_simd(a)+S(b)); }
-inline vec4 operator+(vec4 const& a, float b) { return vec4(as_simd(a)+S(b)); }
-inline quat operator+(quat const& a, float b) { return quat(as_simd(a)+S(b)); }
+inline vec3 operator+(vec3 const& a, float b) { return as_vec3(as_simd(a)+S(b)); }
+inline vec4 operator+(vec4 const& a, float b) { return as_vec4(as_simd(a)+S(b)); }
+inline quat operator+(quat const& a, float b) { return as_quat(as_simd(a)+S(b)); }
 
 inline vec2 operator-(vec2 const& a, vec2 const& b) { return vec2(a.x-b.x, a.y-b.y); }
-inline vec3 operator-(vec3 const& a, vec3 const& b) { return vec3(as_simd(a)-as_simd(b)); }
-inline vec4 operator-(vec4 const& a, vec4 const& b) { return vec4(as_simd(a)-as_simd(b)); }
-inline quat operator-(quat const& a, quat const& b) { return quat(as_simd(a)-as_simd(b)); }
+inline vec3 operator-(vec3 const& a, vec3 const& b) { return as_vec3(as_simd(a)-as_simd(b)); }
+inline vec4 operator-(vec4 const& a, vec4 const& b) { return as_vec4(as_simd(a)-as_simd(b)); }
+inline quat operator-(quat const& a, quat const& b) { return as_quat(as_simd(a)-as_simd(b)); }
 inline vec2 operator-(vec2 const& a, float b) { return vec2(a.x-b, a.y-b); }
-inline vec3 operator-(vec3 const& a, float b) { return vec3(as_simd(a)-S(b)); }
-inline vec4 operator-(vec4 const& a, float b) { return vec4(as_simd(a)-S(b)); }
-inline quat operator-(quat const& a, float b) { return quat(as_simd(a)-S(b)); }
+inline vec3 operator-(vec3 const& a, float b) { return as_vec3(as_simd(a)-S(b)); }
+inline vec4 operator-(vec4 const& a, float b) { return as_vec4(as_simd(a)-S(b)); }
+inline quat operator-(quat const& a, float b) { return as_quat(as_simd(a)-S(b)); }
 
 inline vec2 operator*(vec2 const& a, float b) { return vec2(a.x*b, a.y*b); }
-inline vec3 operator*(vec3 const& a, float b) { return vec3(as_simd(a)*S(b)); }
-inline vec4 operator*(vec4 const& a, float b) { return vec4(as_simd(a)*S(b)); }
-inline quat operator*(quat const& a, float b) { return quat(as_simd(a)*S(b)); }
+inline vec3 operator*(vec3 const& a, float b) { return as_vec3(as_simd(a)*S(b)); }
+inline vec4 operator*(vec4 const& a, float b) { return as_vec4(as_simd(a)*S(b)); }
+inline quat operator*(quat const& a, float b) { return as_quat(as_simd(a)*S(b)); }
 
 inline vec2 operator/(vec2 const& a, float b) { return vec2(a.x/b, a.y/b); }
-inline vec3 operator/(vec3 const& a, float b) { return vec3(as_simd(a)/S(b)); }
-inline vec4 operator/(vec4 const& a, float b) { return vec4(as_simd(a)/S(b)); }
-inline quat operator/(quat const& a, float b) { return quat(as_simd(a)/S(b)); }
+inline vec3 operator/(vec3 const& a, float b) { return as_vec3(as_simd(a)/S(b)); }
+inline vec4 operator/(vec4 const& a, float b) { return as_vec4(as_simd(a)/S(b)); }
+inline quat operator/(quat const& a, float b) { return as_quat(as_simd(a)/S(b)); }
 
 
 inline bool operator==(vec3 const& a, vec3 const& b) {
@@ -162,7 +171,7 @@ inline quat conj(quat const& a)
 {
 	S q(Ax);
 	M m{false,false,false,true};
-	return quat(q.neg(m));
+	return as_quat(q.neg(m));
 }
 
 inline quat from_axis_angle(vec3 const& axis, float angle)
@@ -175,7 +184,7 @@ inline quat from_axis_angle(vec3 const& axis, float angle)
 	float ca = cos(a2);
 	S sa1{sa, sa, sa, ca};
 	S vv = as_simd(axis,1.0f);
-	return quat(vv * sa);
+	return as_quat(vv * sa);
 #endif
 }
 
@@ -198,15 +207,17 @@ inline quat mul(quat const& a, quat const& b)
 	S q1 = a0 * bs1;
 	S q2 = a1 * bs2;
 	S q3 = a2 * bs3;
-	return quat(q0 + q1 + q2 + q3);
+	return as_quat(q0 + q1 + q2 + q3);
 }
 
-#define STIR_MATRIX_UN_OP(op) for(int i=0; i<4; ++i) { S q=S(x+i*4) op S(z.x+i*4); q.store(x+i*4); } return *this
-#define STIR_MATRIX_UN_S_OP(op) S kk(k); for(int i=0; i<4; ++i) { S q=S(x+i*4) op kk; q.store(x+i*4); } return *this
-#define STIR_MATRIX_BIN_OP(op) matrix r; for(int i=0; i<4; ++i) { S q=S(a.x+i*4) op S(b.x+i*4); q.store(r.x+i*4); } return r
-#define STIR_MATRIX_BIN_S_OP(op) matrix r; S kk(k); for(int i=0; i<4; ++i) { S q=S(a.x+i*4) op kk; q.store(r.x+i*4); } return r
 
-#define STIR_MATRIX_BIN_S_OP(op) matrix r; S kk(k); for(int i=0; i<4; ++i) { S q=S(a.x+i*4) op kk; q.store(r.x+i*4); } return r
+
+#define STIR_MATRIX_UN_OP(op) for(int i=0; i<4; ++i) { simd_mipp::S q=simd_mipp::S(x+i*4) op simd_mipp::S(z.x+i*4); q.store(x+i*4); } return *this
+#define STIR_MATRIX_UN_S_OP(op) simd_mipp::S kk(k); for(int i=0; i<4; ++i) { simd_mipp::S q=simd_mipp::S(x+i*4) op kk; q.store(x+i*4); } return *this
+#define STIR_MATRIX_BIN_OP(op) matrix r; for(int i=0; i<4; ++i) { simd_mipp::S q=simd_mipp::S(a.x+i*4) op simd_mipp::S(b.x+i*4); q.store(r.x+i*4); } return r
+#define STIR_MATRIX_BIN_S_OP(op) matrix r; simd_mipp::S kk(k); for(int i=0; i<4; ++i) { simd_mipp::S q=simd_mipp::S(a.x+i*4) op kk; q.store(r.x+i*4); } return r
+
+#define STIR_MATRIX_BIN_S_OP(op) matrix r; simd_mipp::S kk(k); for(int i=0; i<4; ++i) { simd_mipp::S q=simd_mipp::S(a.x+i*4) op kk; q.store(r.x+i*4); } return r
 
 inline matrix operator-(matrix const& a, matrix const& b) { STIR_MATRIX_BIN_OP(-); }
 inline matrix operator+(matrix const& a, matrix const& b) { STIR_MATRIX_BIN_OP(+); }
@@ -217,6 +228,57 @@ inline matrix operator+(matrix const& a, float k) { STIR_MATRIX_BIN_S_OP(+); }
 inline matrix operator-(matrix const& a, float k) { STIR_MATRIX_BIN_S_OP(-); }
 inline matrix operator*(matrix const& a, float k) { STIR_MATRIX_BIN_S_OP(*); }
 inline matrix operator/(matrix const& a, float k) { STIR_MATRIX_BIN_S_OP(/); }
+
+inline matrix mul(matrix const& a, matrix const& b)
+{
+	matrix m;
+	S b0(b.x+4*0), b1(b.x+4*1), b2(b.x+4*2), b3(b.x+4*3);
+
+	for (int i=0; i<4; ++i)
+	{
+		S aa(a.x+4*i);
+		S a0 = S(aa[0]);
+		S a1 = S(aa[1]);
+		S a2 = S(aa[2]);
+		S a3 = S(aa[3]);
+
+		S row = a0*b0 + a1*b1 + a2*b2 + a3*b3;
+		row.store(m.x+4*i);
+	}
+
+	return m;
+}
+
+inline matrix transpose(matrix const& m)
+{
+	matrix r;
+
+	S a(m.x+0*4), b(m.x+1*4), c(m.x+2*4), d(m.x+3*4);
+
+	// see ref.cpp:transpose for what we want to achieve
+	// hi(c a)	cw aw cz az //1			L(4 2) dx cx bx ax	
+	// lo (c a) cy ay cx ax //2 -->		H(4 2) dy cy by ay
+	// hi(d b)	dw bw dz bz //3 		L(3 1) dz cz bz az
+	// lo (d b) dy by dx bx //4			H(3 1) dw cw bw aw
+
+	S u1=mipp::interleavehi(c, a);
+	S u2=mipp::interleavelo(c, a);
+	S u3=mipp::interleavehi(d, b);
+	S u4=mipp::interleavelo(d, b);
+
+	S v1=mipp::interleavehi(u4, u2);
+	S v2=mipp::interleavelo(u4, u2);
+	S v3=mipp::interleavehi(u3, u1);
+	S v4=mipp::interleavelo(u3, u1);
+
+	v1.store(r.x+0*4);
+	v2.store(r.x+1*4);
+	v3.store(r.x+2*4);
+	v4.store(r.x+3*4);
+
+	return r;
+}
+//matrix mul(matrix const& a, matrix const& b);
 
 /*inline matrix operator*(matrix const& a, float k) {
 	S kk(k);
@@ -229,11 +291,10 @@ inline matrix operator/(matrix const& a, float k) { STIR_MATRIX_BIN_S_OP(/); }
 
 } // simd_mipp
 
-inline vec2::vec2(S a) { x=a[0]; y=a[1]; }
-inline vec3::vec3(S a)
-{
-	x=a[0]; y=a[1]; z=a[2];
-}
+/*inline vec2::vec2(S a) { x=a[0]; y=a[1]; }
+inline vec3::vec3(S a) { x=a[0]; y=a[1]; z=a[2]; }
+inline vec4::vec4(S a) { a.storeu(Tx); }
+inline quat::quat(S a) { a.storeu(Tx); }*/
 
 #if STIR_MATH_MODE == STIR_MATH_MIPP
 inline void vec2::normalize() { S s = simd_mipp::impl::n4(S{x,y,0,0}); x=s[0]; y=s[1]; }
@@ -242,15 +303,7 @@ inline void vec4::normalize() { simd_mipp::impl::n4(S(Tx)).storeu(Tx); }
 inline void quat::normalize() { simd_mipp::impl::n4(S(Tx)).storeu(Tx); }
 #endif
 
-inline vec4::vec4(S a)
-{
-	a.store(Tx);
-}
-
 inline vec4 vec3::as_vec4(float w) const { return vec4(x,y,z,w); }
-
-
-inline quat::quat(S a) { a.storeu(Tx); }
 
 inline matrix const& matrix::operator+=(matrix const& z) { STIR_MATRIX_UN_OP(+); }
 inline matrix const& matrix::operator-=(matrix const& z) { STIR_MATRIX_UN_OP(-); }

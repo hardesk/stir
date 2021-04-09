@@ -1,6 +1,7 @@
 #ifndef STIR_MATH_REF_HPP_
 #define STIR_MATH_REF_HPP_
 
+#include <cmath>
 #include "math_def.hpp"
 
 namespace stir
@@ -79,7 +80,10 @@ vec4 mul(vec4 const& v, matrix const& a);
 vec4 mul(vec3 const& v, matrix const& a);
 vec3 mul3(vec3 const& v, matrix const& a);
 
+matrix transpose(matrix const& m);
 matrix rot_matrix(quat const& q);
+matrix transform_inverse(matrix const& m);
+matrix full_inverse(matrix const& m);
 
 } // namespace ref
 

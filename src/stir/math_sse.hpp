@@ -2,12 +2,27 @@
 #define STIR_MATH_SSE_HPP_
 
 #include "math_def.hpp"
+#include <xmmintrin.h> // sse
+#include <emmintrin.h> // sse2
+#include <pmmintrin.h> // sse3
 
 namespace stir::sse {
 
 // _MM_SHUFFLE index 0 is right-most (least significant little endian), so x:0 y:1 z:2 w:3
-//#define _mm_shufpsd(r,i) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(aa), i))
-#define mm_shufps(r,i) _mm_shuffle_ps(r, r, i)
+#define mm_shufps(r,i) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(r), i))
+//#define mm_shufps(r,i) _mm_shuffle_ps(r, r, i)
+//
+//inline vec2 as_vec2(S s) { return vec2(s[0], s[1]); }
+inline vec3 as_vec3(__m128 s) {
+	vec3 v;
+	_mm_storeu_si64(&v.x,_mm_castps_si128(s));
+	_mm_storeu_si32(&v.z,_mm_shuffle_epi32(_mm_castps_si128(s), _MM_SHUFFLE(2,2,2,2)));
+	return v;
+}
+//inline vec3 as_vec3(S s) { return vec3(s[0], s[1], s[2]); }
+
+inline vec4 as_vec4(__m128 s) { vec4 v; _mm_storeu_ps(&v.x, s); return v; }
+inline quat as_quat(__m128 s) { quat v; _mm_storeu_ps(&v.x, s); return v; }
 
 inline quat mul(quat const& a, quat const& b)
 {
@@ -49,7 +64,7 @@ inline quat mul(quat const& a, quat const& b)
 	__m128 qb = mm_shufps(_mm_addsub_ps(qa, q2), _MM_SHUFFLE(3,2,0,1));
 	__m128 qc = mm_shufps(_mm_addsub_ps(qb, q3), _MM_SHUFFLE(2,1,3,0));
 	
-	return quat(qc);
+	return as_quat(qc);
 }
 
 inline matrix mul(matrix const& a, matrix const& b)
@@ -74,6 +89,28 @@ inline matrix mul(matrix const& a, matrix const& b)
 				_mm_add_ps(_mm_mul_ps(a2, b2), _mm_mul_ps(a3, b3))); 
 		_mm_storeu_ps(r.x + i*4, rr);
 	}
+
+	return r;
+}
+
+inline matrix transpose(matrix const& m)
+{
+	matrix r;
+
+	__m128 a = _mm_loadu_ps(m.x + 0*4);
+	__m128 b = _mm_loadu_ps(m.x + 1*4);
+	__m128 c = _mm_loadu_ps(m.x + 2*4);
+	__m128 d = _mm_loadu_ps(m.x + 3*4);
+
+	__m128 u1=_mm_unpackhi_ps(c, a);
+	__m128 u2=_mm_unpacklo_ps(c, a);
+	__m128 u3=_mm_unpackhi_ps(d, b);
+	__m128 u4=_mm_unpacklo_ps(d, b);
+
+	_mm_storeu_ps(r.x + 0*4, _mm_unpackhi_ps(u4, u2));
+	_mm_storeu_ps(r.x + 1*4, _mm_unpacklo_ps(u4, u2));
+	_mm_storeu_ps(r.x + 2*4, _mm_unpackhi_ps(u3, u1));
+	_mm_storeu_ps(r.x + 3*4, _mm_unpacklo_ps(u3, u1));
 
 	return r;
 }

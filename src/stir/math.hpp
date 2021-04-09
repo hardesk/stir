@@ -28,44 +28,10 @@
 // Vector is interpreted as 1x4 (a row) matrix.
 // Thus vector/matrix multiplication happens as v * M
 
-namespace stir
-{
-
-
-}
-
 #if 0
 
 namespace stir
 {
-
-inline Vector4 mul_raw(Vector4 const& v, Matrix const& a)
-{
-	BF4 vv(v.simd_data());
-	BF4 v0 = BF4(vv[0]);
-	BF4 v1 = BF4(vv[1]);
-	BF4 v2 = BF4(vv[2]);
-	BF4 v3 = BF4(vv[3]);
-
-	BF4 a0, a1, a2, a3;
-	a0.load_aligned(a.el[0]);
-	a1.load_aligned(a.el[0]);
-	a2.load_aligned(a.el[0]);
-	a3.load_aligned(a.el[0]);
-
-	return Vector4(v0*a0 + v1*a1 + v2*a2 + v3*a3);
-}
-
-inline Vector4 mul(Vector4 const& v, Matrix const& a)
-{
-	BF4 vv(v.simd_data());
-	BF4 v0 = BF4(vv[0]);
-	BF4 v1 = BF4(vv[1]);
-	BF4 v2 = BF4(vv[2]);
-	BF4 v3 = BF4(vv[3]);
-
-	return Vector4(v0*a.row[0] + v1*a.row[1] + v2*a.row[2] + v3*a.row[3]);
-}
 
 inline Vector4 mul(Vector3 const& v, Matrix const& a)
 {
@@ -94,62 +60,6 @@ inline Vector3 mul3(Vector3 const& v, Matrix const& a)
 	return Vector3(r[0], r[1], r[2]);
 }
 
-inline Matrix mul_xsimd_old(Matrix const& a, Matrix const& b)
-{
-	Matrix r;
-	
-	using R = xsimd::batch<float, 4>; 
-
-	R b0(b.el[0]), b1(b.el[1]), b2(b.el[2]), b3(b.el[3]);
-
-	for (int i=0; i<4; ++i)
-	{
-		R aa(a.el[i]);
-		R a0 = R(aa[0]);
-		R a1 = R(aa[1]);
-		R a2 = R(aa[2]);
-		R a3 = R(aa[3]);
-
-		R row = a0*b0 + a1*b1 + a2*b2 + a3*b3;
-		row.store_aligned(r.el[i]);
-	}
-
-	return r;
-}
-
-template<class Tag>
-void mul_xsimd_ptr(float const* a, float const* b, float* dest)
-{
-	using R = xsimd::batch<float, 4>; 
-
-	R b0, b1, b2, b3;
-	xsimd::load_simd(b+ 0, b0, Tag());
-	xsimd::load_simd(b+ 4, b1, Tag());
-	xsimd::load_simd(b+ 8, b2, Tag());
-	xsimd::load_simd(b+12, b3, Tag());
-
-	for (int i=0; i<4; ++i)
-	{
-		R aa;
-		xsimd::load_simd(a + i*4, aa, Tag());
-		R a0 = R(aa[0]);
-		R a1 = R(aa[1]);
-		R a2 = R(aa[2]);
-		R a3 = R(aa[3]);
-
-		R row = a0*b0 + a1*b1 + a2*b2 + a3*b3;
-		xsimd::store_simd(dest + i*4, row, Tag());
-	}
-
-	//dest[0] = 0xdeadbabe;
-}
-
-inline Matrix mul_xsimd(Matrix const& a, Matrix const& b)
-{
-	Matrix m;
-	mul_xsimd_ptr<xsimd::aligned_mode>(a.el[0], b.el[0], m.el[0]);
-	return m;
-}
 
 }
 

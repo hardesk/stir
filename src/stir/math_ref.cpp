@@ -117,6 +117,19 @@ quat log(quat const& a)
 	return quat(a.x*m, a.y*m, a.z*m, lnq);
 }
 
+matrix transpose(matrix const& m)
+{
+	matrix r;
+	// aw az ay ax		dx cx bx ax
+	// bw bz by bx -->	dy cy by ay
+	// cw cz cy cx		dz cz bz az
+	// dw dz dy dx		dw cw bw aw
+	for(int i=0; i<4; ++i)
+		for(int j=0; j<4; ++j)
+			r.x[i*4+j]=m.x[j*4+i];
+	return r;
+}
+
 } // ref
 
 }
