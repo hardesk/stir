@@ -1,0 +1,6 @@
+[wrap-git]
+directory = nanobench
+url = https://github.com/martinus/nanobench.git
+revision = v4.3.11
+depth = 1
+patch_directory = nanobench-patch

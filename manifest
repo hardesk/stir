@@ -1,9 +1,0 @@
-: 1
-name: stir
-version: 0.1.0-a.0.z
-summary: stir library
-license: BSD
-url: https://bitbucket.org/x01/stir
-email: ogn.info@gmail.com
-depends: * build2 >= 0.8.0-
-depends: * bpkg >= 0.8.0-

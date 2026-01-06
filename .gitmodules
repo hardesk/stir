@@ -1,27 +1,9 @@
-[submodule "externals/doctest"]
-	path = externals/doctest
-	url = https://github.com/onqtam/doctest.git
-[submodule "externals/xsimd"]
-	path = externals/xsimd
-	url = git@github.com:QuantStack/xsimd.git
-[submodule "externals/fmt"]
-	path = externals/fmt
-	url = git@github.com:fmtlib/fmt.git
 [submodule "externals/imgui"]
 	path = externals/imgui
 	url = git@github.com:ocornut/imgui.git
 [submodule "externals/spdlog"]
 	path = externals/spdlog
 	url = git@github.com:gabime/spdlog.git
-[submodule "externals/benchmark"]
-	path = externals/benchmark
-	url = git@github.com:hardesk/build2-benchmark.git
-[submodule "externals/lua"]
-	path = externals/lua
-	url = git@github.com:hardesk/build2-lua.git
 [submodule "externals/mipp"]
 	path = externals/mipp
 	url = git@github.com:aff3ct/MIPP.git
-[submodule "externals/nanobench"]
-	path = externals/nanobench
-	url = git@github.com:martinus/nanobench.git

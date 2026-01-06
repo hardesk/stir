@@ -1,10 +1,11 @@
 #include <nanobench.h>
-#include <doctest/doctest.h>
+#include <doctest.h>
 
-#include <stir/math.hpp>
-#include <stir/math_mipp.hpp>
-#include <stir/math_sse.hpp>
-#include <stir/math_xsimd.hpp>
+#include <stir/math/math.hpp>
+//#include <stir/math_mipp.hpp>
+#include <stir/math/ref.hpp>
+
+#include <glm/glm.hpp>
 
 namespace bench = ankerl::nanobench;
 using namespace stir;
@@ -14,89 +15,27 @@ float f11() { return r.uniform01()*2-1; }
 #define rF f11()
 matrix rM() { return matrix(rF,rF,rF,rF, rF,rF,rF,rF, rF,rF,rF,rF, rF,rF,rF,rF); }
 
-
-quat __attribute__((noinline)) do_math_quat_sse(quat const& a)
-{
-	quat q=sse::mul(a,quat(2,1,3,0.2f));
-	q = sse::mul(a,a) + q / 4.f;
-	return q;
-}
-
-matrix __attribute__((noinline)) do_math1_matrix(matrix const& a)
-{
-	matrix mm=rM();
-	return simd_mipp::mul(mm, simd_mipp::transpose(a));
-}
-
-matrix __attribute__((noinline)) do_math1_matrix_mipp(matrix const& a)
-{
-	matrix mm=matrix::identity();
-	return simd_mipp::mul(mm, a);
-}
-
-matrix __attribute__((noinline)) do_math1_matrix_sse(matrix const& a)
-{
-	matrix mm=matrix::identity();
-	return sse::mul(mm, a);
-}
-
-matrix __attribute__((noinline)) do_math1_matrix_xsimd(matrix const& a)
-{
-	matrix mm=matrix::identity();
-	return simd_xsimd::mul(mm, a);
-}
-
-
-matrix __attribute__((noinline)) do_math1_matrix_transpose_ref(matrix const& a)
-{
-	return ref::transpose(a);
-}
-
-matrix __attribute__((noinline)) do_math1_matrix_transpose_mipp(matrix const& a)
-{
-	return simd_mipp::transpose(a);
-}
-
-matrix __attribute__((noinline)) do_math1_matrix_transpose_sse(matrix const& a)
-{
-	return sse::transpose(a);
-}
-
-matrix __attribute__((noinline)) do_math1_matrix_transpose_xsimd(matrix const& a)
-{
-	return simd_xsimd::transpose(a);
-}
-
-
 TEST_CASE("math vec benchmark")
 {
+	ankerl::nanobench::Bench b;
+    b.title("vec3 math")
+        .warmup(10)
+		.performanceCounters(true)
+		.minEpochIterations(50000);
+
 	stir::vec3 v3{rF,rF,rF};
-	bench::Bench().run("vec3::normalize", [&] {
-		v3.normalize();
-		bench::doNotOptimizeAway(v3);
-	});
-	bench::Bench().run("vec3 normalize ref", [&] {
-		vec3 v=ref::normalize(v3);
-		bench::doNotOptimizeAway(v);
-	});
-	bench::Bench().run("vec3 normalize", [&] {
-		stir::vec3 v = normalize(v3);
-		bench::doNotOptimizeAway(v);
-	});
+	stir::vec3 v33{rF,rF,rF};
+	b.run("vec3::normalize", [&] { vec3 v = normalize(v3); bench::doNotOptimizeAway(v); });
+	b.run("vec3 normalize (ref)", [&] { vec3 v=ref::normalize(v3); bench::doNotOptimizeAway(v); });
+	//b.run("vec3 normalize (mipp)", [&] { stir::vec3 v = simd_mipp::normalize(v3); bench::doNotOptimizeAway(v); });
+
+	b.run("vec3 cross", [&] { stir::vec3 v=cross(v3, v33); bench::doNotOptimizeAway(v); });
+	b.run("vec3 cross (ref)", [&] { stir::vec3 v=ref::cross(v3, v33); bench::doNotOptimizeAway(v); });
 
 	stir::vec4 v4{rF, rF, rF, rF};
-	bench::Bench().run("vec4::normalize", [&] {
-		v4.normalize();
-		bench::doNotOptimizeAway(v4);
-	});
-	bench::Bench().run("vec4 normalize ref", [&] {
-		vec4 v=ref::normalize(v4);
-		bench::doNotOptimizeAway(v);
-	});
-	bench::Bench().run("vec4 normalize", [&] {
-		vec4 v=normalize(v4);
-		bench::doNotOptimizeAway(v);
-	});
+	b.run("vec4::normalize", [&] { vec4 v=normalize(v4); bench::doNotOptimizeAway(v); });
+	b.run("vec4 normalize (ref)", [&] { vec4 v=ref::normalize(v4); bench::doNotOptimizeAway(v); });
+	// b.run("vec4 normalize (neon)", [&] { vec4 v=simd_mipp::normalize(v4); bench::doNotOptimizeAway(v); });
 }
 
 /*TEST_CASE("math matrix benchmark")
@@ -111,34 +50,54 @@ TEST_CASE("math vec benchmark")
 
 TEST_CASE("math quat benchmark")
 {
-	quat q(rF,rF,rF,rF);
+	quat q1(rF,rF,rF,rF);
 	quat q2(rF,rF,rF,rF);
+    vec3 v3(rF,rF,rF);
+    quat qn = normalize(q1);
 
-	bench::Bench().run("quat mul ref", [&] {
-		quat q1=ref::mul(q, q2);
-		bench::doNotOptimizeAway(q1);
-	});
+    ankerl::nanobench::Bench b;
+    b.title("quat math")
+        .warmup(10)
+		.performanceCounters(true)
+		.minEpochIterations(50000);
 
-	bench::Bench().run("quat mul", [&] {
-		quat q1=mul(q, q2);
-		bench::doNotOptimizeAway(q1);
-	});
+	b.run("quat mul (ref)", [&] { quat q=ref::mul(q1, q2); bench::doNotOptimizeAway(q); });
+	b.run("quat mul", [&] { quat q=mul(q1, q2); bench::doNotOptimizeAway(q); });
 
-	bench::Bench().run("quat mul (xsimd)", [&] {
-		quat q1=simd_xsimd::mul(q, q2);
-		bench::doNotOptimizeAway(q1);
-	});
+	b.run("quat rot (ref)", [&] { vec3 v=ref::rot(v3, qn); bench::doNotOptimizeAway(v); });
+	b.run("quat rot", [&] { vec3 v=rot(v3, qn); bench::doNotOptimizeAway(v); });
 
-	bench::Bench().run("quat mul (sse)", [&] {
-		quat q1=sse::mul(q, q2);
-		bench::doNotOptimizeAway(q1);
-	});
+	// bench::Bench().run("quat mul (xsimd)", [&] {
+	// 	quat q1=simd_xsimd::mul(q, q2);
+	// 	bench::doNotOptimizeAway(q1);
+	// });
 
-	vec3 v(rF,rF,rF);
-	bench::Bench().run("vec3 rot quat", [&] {
-		vec3 vr=rot(v, q);
-		bench::doNotOptimizeAway(vr);
-	});
+	// bench::Bench().run("quat mul (sse)", [&] {
+	// 	quat q1=sse::mul(q, q2);
+	// 	bench::doNotOptimizeAway(q1);
+	// });
+
+	// vec3 v(rF,rF,rF);
+	// bench::Bench().run("vec3 rot quat", [&] {
+	// 	vec3 vr=rot(v, q);
+	// 	bench::doNotOptimizeAway(vr);
+	// });
+	// bench::Bench().run("vec3 rot quat (ref)", [&] {
+	// 	vec3 vr=ref::rot(v, q);
+	// 	bench::doNotOptimizeAway(vr);
+	// });
+	// bench::Bench().run("vec3 rot quat (mipp)", [&] {
+	// 	vec3 vr=simd_mipp::rot(v, q);
+	// 	bench::doNotOptimizeAway(vr);
+	// });
+}
+
+glm::mat4 toglm(matrix m) {
+    glm::mat4 r;
+    for (int i=0; i<4; ++i)
+        for (int j=0; j<4; ++j)
+            r[i][j] = m(i,j);
+    return r;
 }
 
 TEST_CASE("math matrix benchmark")
@@ -146,28 +105,41 @@ TEST_CASE("math matrix benchmark")
 	matrix m1(1,2,3,4, 5,6,7,8, 9,0,1,2, 3,4,5,6);
 	matrix m2(1,1,2,2, 3,3,4,4, 5,5,6,6, 7,7,8,8);
 	matrix m(rF,rF,rF,rF, rF,rF,rF,rF, rF,rF,rF,rF,rF,rF,rF,rF);
+	matrix mX(rF,rF,rF,rF, rF,rF,rF,rF, rF,rF,rF,rF,rF,rF,rF,rF);
 
-	bench::Bench().run("matrix mul", [&] {
-		matrix m=mul(m1, m2);
-		bench::doNotOptimizeAway(m);
-	});
+    glm::mat4  glm_m1 = toglm(m1);
+    glm::mat4  glm_m2 = toglm(m2);
+    glm::mat4  glm_m = toglm(m);
+    glm::mat4  glm_mX = toglm(m);
 
-	bench::Bench().run("matrix mul (ref)", [&] {
-		matrix m=ref::mul(m1, m2);
-		bench::doNotOptimizeAway(m);
-	});
+	ankerl::nanobench::Bench b;
+    b.title("matrix math")
+        .warmup(10);
+    b.performanceCounters(true);
+	b.minEpochIterations(50000);
 
-	bench::Bench().run("matrix mul (sse)", [&] {
-		matrix m=sse::mul(m1, m2);
-		bench::doNotOptimizeAway(m);
-	});
+	b.run("matrix mulC",			[&] { matrix m=mul(m1, m2); bench::doNotOptimizeAway(m); });
+	b.run("matrix mulC (ref)",	[&] { matrix m=ref::mul(m1, m2); bench::doNotOptimizeAway(m); });
+	b.run("matrix mulC (glm)",	[&] { glm::mat4 m=glm_m1*glm_m2; bench::doNotOptimizeAway(m); });
+	// b.run("matrix mul (sse)",	[&] { matrix m=sse::mul(m1, m2); bench::doNotOptimizeAway(m); });
+	// b.run("matrix mul (mipp)",	[&] { matrix m=simd_mipp::mul(m1, m2); bench::doNotOptimizeAway(m); });
 
-	bench::Bench().run("matrix transpose",			[&] { matrix m=transpose(m); bench::doNotOptimizeAway(m); });
-	bench::Bench().run("matrix transpose (ref)",	[&] { matrix m=ref::transpose(m); bench::doNotOptimizeAway(m); });
-	bench::Bench().run("matrix transpose (sse)",	[&] { matrix m=sse::transpose(m); bench::doNotOptimizeAway(m); });
-	bench::Bench().run("matrix transpose (xsimd)",	[&] { matrix m=simd_xsimd::transpose(m); bench::doNotOptimizeAway(m); });
-	bench::Bench().run("matrix transpose (mipp)",	[&] { matrix m=simd_mipp::transpose(m); bench::doNotOptimizeAway(m); });
+	b.run("matrix mul",			[&] { matrix mm=mul(m, mX); bench::doNotOptimizeAway(mm); });
+	b.run("matrix mul (ref)",	[&] { matrix mm=ref::mul(m, mX); bench::doNotOptimizeAway(mm); });
+	b.run("matrix mul (glm)",	[&] { glm::mat4 mm=glm_m*glm_mX; bench::doNotOptimizeAway(mm); });
 
+	b.run("matrix transpose",			[&] { matrix mx=transpose(m); bench::doNotOptimizeAway(mx); });
+	b.run("matrix transpose (ref)",		[&] { matrix mx=ref::transpose(m); bench::doNotOptimizeAway(mx); });
+	b.run("matrix transpose (glm)",	    [&] { glm::mat4 mx=glm::transpose(glm_m); bench::doNotOptimizeAway(mx); });
+	// b.run("matrix transpose (sse)",		[&] { matrix mx=sse::transpose(m); bench::doNotOptimizeAway(mx); });
+	// b.run("matrix transpose (xsimd)",	[&] { matrix mx=simd_xsimd::transpose(m); bench::doNotOptimizeAway(mx); });
+	// b.run("matrix transpose (mipp)",	[&] { matrix mx=simd_mipp::transpose(m); bench::doNotOptimizeAway(mx); });
 
-
+	// matrix q(1,0,2,-5,
+	// 		 2,5,0,3,
+	// 		 -3,4,1,3,
+	// 		 0,-2,7,1);
+	// b.run("matrix inverse",			[&] { matrix mx=inverse(m); bench::doNotOptimizeAway(mx); });
+	// b.run("matrix inverse (ref)",	[&] { matrix mx=ref::inverse(m); bench::doNotOptimizeAway(mx); });
+	// b.run("matrix inverse (sse)",	[&] { matrix mx=sse::inverse(m); bench::doNotOptimizeAway(mx); });
 }
