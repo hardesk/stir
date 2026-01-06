@@ -2,13 +2,15 @@
 
 Playground with code for game development.
 
-Use build2 for building.
+Use meson for build.
 
 ```
 # cd stir.git
-# b
-# ./tests/stir_tests
-# ./tests/stir_bench
+# meson setup b1 .
+# cd b1
+# ninja
+# ./tests/math_tests
+# ./tests/bench
 ```
 
 # math
@@ -17,6 +19,6 @@ Use build2 for building.
 vec2, vec3, vec4, quat, matrix
 
 ### functions
-normalize, mul, operator*, length, dist
+normalize, mul, operators * + - /, length
 
 
