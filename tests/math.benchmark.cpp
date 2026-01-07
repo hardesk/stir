@@ -64,8 +64,8 @@ TEST_CASE("math quat benchmark")
 	b.run("quat mul (ref)", [&] { quat q=ref::mul(q1, q2); bench::doNotOptimizeAway(q); });
 	b.run("quat mul", [&] { quat q=mul(q1, q2); bench::doNotOptimizeAway(q); });
 
-	b.run("quat rot (ref)", [&] { vec3 v=ref::rot(v3, qn); bench::doNotOptimizeAway(v); });
-	b.run("quat rot", [&] { vec3 v=rot(v3, qn); bench::doNotOptimizeAway(v); });
+	b.run("quat rot (ref)", [&] { vec3 v=ref::rot(qn, v3); bench::doNotOptimizeAway(v); });
+	b.run("quat rot", [&] { vec3 v=rot(qn, v3); bench::doNotOptimizeAway(v); });
 
 	// bench::Bench().run("quat mul (xsimd)", [&] {
 	// 	quat q1=simd_xsimd::mul(q, q2);

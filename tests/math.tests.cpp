@@ -157,13 +157,13 @@ TEST_CASE("quat")
     
     SUBCASE("length")
     {
-        CHECK(ref::len(q11) == 2.0f);
+        CHECK(ref::length(q11) == 2.0f);
 
         CHECK(q11 == quat(1,1,1,1));
-        CHECK(len(q11) == Approx(2.0f));
-        CHECK(len(q1234) == Approx(5.47722f));
-        CHECK(len(q1) == Approx(1.0f));
-        CHECK(len(q_n) == Approx(1.0));
+        CHECK(length(q11) == Approx(2.0f));
+        CHECK(length(q1234) == Approx(5.47722f));
+        CHECK(length(q1) == Approx(1.0f));
+        CHECK(length(q_n) == Approx(1.0));
     }
 
     SUBCASE("normalization")
@@ -173,13 +173,13 @@ TEST_CASE("quat")
         CHECK(ref::normalize(q11) == ApproxQuat(q0_5));//quat(0.5,0.5,0.5,0.5));
         CHECK(q0_5 == ref::normalize(q11));//quat(0.5,0.5,0.5,0.5));
 
-        CHECK(len(q_n - q_n) == 0);
-        CHECK(len(normalize(q_n) - q_n) == Approx(0));
-        CHECK(len(normalize(q_c) - q_n) == Approx(0));
+        CHECK(length(q_n - q_n) == 0);
+        CHECK(length(normalize(q_n) - q_n) == Approx(0));
+        CHECK(length(normalize(q_c) - q_n) == Approx(0));
 
         quat a = q_c;
         a.normalize();
-        CHECK(len(a - q_n) == Approx(0));
+        CHECK(length(a - q_n) == Approx(0));
     }
 
     SUBCASE("rot vec3")
@@ -187,13 +187,13 @@ TEST_CASE("quat")
         // identity quaternion rotates vector unchanged
         quat q_i = quat::identity();
         vec3 v(1.0f, 0.0f, 0.0f);
-        vec3 v_rot = rot(v, q_i);
+        vec3 v_rot = rot(q_i, v);
         CHECK(v_rot == ApproxV3(v));
 
         // 90 degree rotation around z-axis
         quat q_z90 = from_axis_angle(vec3(0.0f, 0.0f, 1.0f), stir::pi / 2.0f);
         vec3 x_axis(1.0f, 0.0f, 0.0f);
-        vec3 x_rotated = rot(x_axis, q_z90);
+        vec3 x_rotated = rot(q_z90, x_axis);
         // Should rotate x-axis toward y-axis
         CHECK(x_rotated == ApproxV3(vec3(0.0f, 1.0f, 0.0f)));
         // CHECK(x_rotated[0] == Approx(0.0f));
@@ -204,7 +204,7 @@ TEST_CASE("quat")
         // 180 degree rotation around x-axis
         quat q_x180 = from_axis_angle(vec3(1.0f, 0.0f, 0.0f), 3.14159f);
         vec3 y_axis(0.0f, 1.0f, 0.0f);
-        vec3 y_rotated = rot(y_axis, q_x180);
+        vec3 y_rotated = rot(q_x180, y_axis);
         // Should flip y-axis to negative y
         CHECK(y_rotated[0] == Approx(0.0f));
         CHECK(y_rotated[1] == Approx(-1.0f));

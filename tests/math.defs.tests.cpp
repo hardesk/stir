@@ -27,7 +27,7 @@ TEST_CASE("defs: basic types and constructors") {
         vec4 vcopy = v;
         vcopy.normalize();
         // normalization should change values; check length is > 0
-        CHECK(len(vcopy) > 0.0f);
+        CHECK(length(vcopy) > 0.0f);
     }
 
     SUBCASE("quat basic accessors") {

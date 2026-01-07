@@ -47,10 +47,10 @@ TEST_CASE("common functions: operators, dot/cross, normalize, quat, matrix") {
 
         vec3 muls = a * 2.0f;
         CHECK(muls[0] == doctest::Approx(2.0f));
-        CHECK(len(a) == doctest::Approx(std::sqrt(14.0f)));
+        CHECK(length(a) == doctest::Approx(std::sqrt(14.0f)));
 
         vec3 an = normalize(a);
-        CHECK(len(an) == doctest::Approx(1.0f));
+        CHECK(length(an) == doctest::Approx(1.0f));
     }
 
     SUBCASE("quat operations: conj, inverse, multiply") {
