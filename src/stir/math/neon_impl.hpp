@@ -127,15 +127,6 @@ inline float32x4_t rsqrt(float32x4_t a) {
     return re;
 }
 
-inline float lensq4(float32x4_t a) {
-    return vaddvq_f32(vmulq_f32(a,a));
-}
-
-inline float lensq3(float32x4_t a) {
-    float32x4_t v3 = to_vec3(a);
-    return vaddvq_f32(vmulq_f32(v3,v3));
-}
-
 inline float32_t inv_lensq4(float32x4_t a) {
     float32x4_t sq = vdupq_n_f32(vaddvq_f32(vmulq_f32(a,a)));
     float32x4_t re = recp<1>(sq);
@@ -356,7 +347,7 @@ inline float32x4_t mul_quat(float32x4_t a, float32x4_t b) {
     return r;
 }
 
-inline float32x4_t rot_vec3_quat(float32x4_t v, float32x4_t q) {
+inline float32x4_t rot_quat_vec3(float32x4_t q, float32x4_t v) {
     #if 0
     // v' = q*v*q-1
     float32x4_t q_conj = conj_quat(q);

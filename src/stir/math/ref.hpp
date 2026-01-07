@@ -14,15 +14,15 @@ inline bool operator==(vec4 const& a, vec4 const& b) { return a[0]==b[0] && a[1]
 inline bool operator==(quat const& a, quat const& b) { return a[0]==b[0] && a[1]==b[1] && a[2]==b[2] && a[3]==b[3]; }
 bool operator==(matrix const& a, matrix const& b);
 
-inline float len(vec2 const& a) { return sqrt(a[0]*a[0] + a[1]*a[1]); }
-inline float len(vec3 const& a) { return sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]); }
-inline float len(vec4 const& a) { return sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2] + a[3]*a[3]); }
-inline float len(quat const& a) { return sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2] + a[3]*a[3]); }
+inline float length(vec2 const& a) { return sqrt(a[0]*a[0] + a[1]*a[1]); }
+inline float length(vec3 const& a) { return sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]); }
+inline float length(vec4 const& a) { return sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2] + a[3]*a[3]); }
+inline float length(quat const& a) { return sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2] + a[3]*a[3]); }
 
-inline vec2 normalize(vec2 const& a) { float r=1.0f/ref::len(a); return vec2(a[0]*r, a[1]*r); }
-inline vec3 normalize(vec3 const& a) { float r=1.0f/ref::len(a); return vec3(a[0]*r, a[1]*r, a[2]*r); }
-inline vec4 normalize(vec4 const& a) { float r=1.0f/ref::len(a); return vec4(a[0]*r, a[1]*r, a[2]*r, a[3]*r); }
-inline quat normalize(quat const& a) { float r=1.0f/ref::len(a); return quat(a[0]*r, a[1]*r, a[2]*r, a[3]*r); }
+inline vec2 normalize(vec2 const& a) { float r=1.0f/ref::length(a); return vec2(a[0]*r, a[1]*r); }
+inline vec3 normalize(vec3 const& a) { float r=1.0f/ref::length(a); return vec3(a[0]*r, a[1]*r, a[2]*r); }
+inline vec4 normalize(vec4 const& a) { float r=1.0f/ref::length(a); return vec4(a[0]*r, a[1]*r, a[2]*r, a[3]*r); }
+inline quat normalize(quat const& a) { float r=1.0f/ref::length(a); return quat(a[0]*r, a[1]*r, a[2]*r, a[3]*r); }
 
 inline vec2 operator+(vec2 const& a, vec2 const& b) { return vec2(a[0]+b[0], a[1]+b[1]); }
 inline vec3 operator+(vec3 const& a, vec3 const& b) { return vec3(a[0]+b[0], a[1]+b[1], a[2]+b[2]); }
@@ -90,7 +90,7 @@ vec3 xform_pos(matrix const& m, vec3 const& v);
 vec4 xform_pos4(matrix const& m, vec3 const& v);
 vec3 xform_dir(matrix const& m, vec3 const& v);
 
-inline vec3 rot(vec3 const& v, quat const& q) {
+inline vec3 rot(quat const& q, vec3 const& v) {
 	quat qv(v[0], v[1], v[2], 0);
 	quat m = ref::mul(ref::mul(q,qv),ref::conj(q));
 	return vec3(m[0], m[1], m[2]);

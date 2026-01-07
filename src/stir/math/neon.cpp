@@ -12,7 +12,7 @@ vec3 TEST_vec3(vec3 a, vec3 b) {
 
 #if 1
 vec3 TEST_quat(float an, vec3 ax, quat q) {
-    return rot(ax, q);
+    return rot(q, ax);
 //    return from_axis_angle(ax, an);
     //return mul(quat(1,2,3,4), q);
 }

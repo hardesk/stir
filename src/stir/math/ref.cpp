@@ -122,7 +122,7 @@ quat exp(quat const& a)
 {
 	// exp(q)=e^w * (cos|v| + v/|v|*sin|v|)
 	float ew=std::exp(a.scalar());
-	float l=ref::len(a.v3());
+	float l=ref::length(a.v3());
 	float cv=std::cosf(l);
 	float sv=std::sinf(l);
 	float m=ew/l;
@@ -132,8 +132,8 @@ quat exp(quat const& a)
 quat log(quat const& a)
 {
 	// ln(q)=ln|q|+v/|v|arccos(a/|q|)
-	float lq=ref::len(a);
-	float lv=ref::len(a.v3());
+	float lq=ref::length(a);
+	float lv=ref::length(a.v3());
 	float ac=std::acos(a[3]/lq);
 	float lnq=std::log(lq);
 	float m=1.0f/lv*ac;
