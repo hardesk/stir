@@ -15,6 +15,19 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb"
+        },
+        {
+            "name": "C++ DBG Launch (Windows)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/b1/tests/math_tests.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/b1/tests",
+            "environment": [],
+            "externalConsole": false,
+            // "visualizerFile": "${workspaceFolder}/src/vsdbg.natvis"
         }
+        
     ]
 }
