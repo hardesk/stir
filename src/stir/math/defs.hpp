@@ -37,9 +37,9 @@ struct vec2
 	vec2(simd::impl::F4 a) : v(a) {}
 	vec2(float x, float y) : v(simd::impl::assign_4f_2f(x, y)) {}
 
-	float operator[](int i) const { return simd::impl::elem_4f(v, i); }
+	float STIR_SSE_CALL operator[](int i) const { return simd::impl::elem_4f(v, i); }
 
-	inline void normalize();
+	inline void STIR_SSE_CALL normalize();
 
 	simd::impl::F4 v;
 };
@@ -55,12 +55,12 @@ struct vec3
 	explicit vec3(vec2 const& v2, float z = 0) : v(simd::impl::swizz<0, 1>::get2(v2.v, z, 0)) {}
 	explicit vec3(float x) : v(simd::impl::assign_4f_1f(x)) {}
 
-	void loadu(float const* p) { v = simd::impl::load_3f(p); }
+	void STIR_SSE_CALL loadu(float const* p) { v = simd::impl::load_3f(p); }
 
-	void set(float x, float y, float z) { v = simd::impl::assign_4f_3f(x, y, z); }
-	float operator[](size_t i) const { return simd::impl::elem_4f(v, i); }
+	void STIR_SSE_CALL set(float x, float y, float z) { v = simd::impl::assign_4f_3f(x, y, z); }
+	float STIR_SSE_CALL operator[](size_t i) const { return simd::impl::elem_4f(v, i); }
 
-	inline void normalize();
+	inline void STIR_SSE_CALL normalize();
 	
 	simd::impl::F4 v;
 };
@@ -76,9 +76,9 @@ struct vec4
 	explicit vec4(vec3 const& v2, float w = 1.0f) : v(simd::impl::swizz<0, 1, 2>::get3(v2.v, w)) {}
 	vec4(float x, float y, float z, float w) : v(simd::impl::assign_4f_4f(x,y,z,w)) {}
 
-	float operator[](size_t i) const { return simd::impl::elem_4f(v, i); }
+	float STIR_SSE_CALL operator[](size_t i) const { return simd::impl::elem_4f(v, i); }
 	
-	inline void normalize();
+	inline void STIR_SSE_CALL normalize();
 
 	simd::impl::F4 v;
 };
@@ -92,14 +92,14 @@ struct quat
 	quat(simd::impl::F4 a) : v(a) {}
 	quat(float x, float y, float z, float w) : v(simd::impl::assign_4f_4f(x,y,z,w)) {}
 
-	static quat identity() { return quat(0,0,0,1.0f); }
+	static quat STIR_SSE_CALL identity() { return quat(0,0,0,1.0f); }
 
-	float operator[](size_t i) const { return simd::impl::elem_4f(v, i); }
-	vec3 v3() const { return vec3{ simd::impl::swizz<0, 1, 2>::get3(v, 0) }; }
-	inline vec3 axis() const;
-	float scalar() const { return simd::impl::elem_4f(v, 3); }
+	float STIR_SSE_CALL operator[](size_t i) const { return simd::impl::elem_4f(v, i); }
+	vec3 STIR_SSE_CALL v3() const { return vec3{ simd::impl::swizz<0, 1, 2>::get3(v, 0) }; }
+	inline vec3 STIR_SSE_CALL axis() const;
+	float STIR_SSE_CALL scalar() const { return simd::impl::elem_4f(v, 3); }
 
-	inline void normalize();
+	inline void STIR_SSE_CALL normalize();
 	simd::impl::F4 v;
 };
 //static_assert(std::is_standard_layout<quat>::value == true);
@@ -141,32 +141,32 @@ struct matrix
 	// 	memcpy(x, l.begin(), sizeof(float)*(l.end()-l.begin()));
 	// }
 
-	void set(size_t col, float x, float y, float z, float w) { v.val[col] = simd::impl::assign_4f_4f(x, y, z, w); }
-	void set(size_t col, simd::impl::F4 a) { v.val[col] = a; }
-	void set(size_t col, vec4 a) { v.val[col] = a.v; }
+	void STIR_SSE_CALL set(size_t col, float x, float y, float z, float w) { v.val[col] = simd::impl::assign_4f_4f(x, y, z, w); }
+	void STIR_SSE_CALL set(size_t col, simd::impl::F4 a) { v.val[col] = a; }
+	void STIR_SSE_CALL set(size_t col, vec4 a) { v.val[col] = a.v; }
 
 	// simd::impl::F4 col(size_t col) const { return v.val[col]; }
-	vec4 col(size_t col) const { return vec4{ v.val[col] }; }
-	float el(size_t i) const { return simd::impl::elem_16f(v, i>>2, i&3); }
+	vec4 STIR_SSE_CALL col(size_t col) const { return vec4{ v.val[col] }; }
+	float STIR_SSE_CALL el(size_t i) const { return simd::impl::elem_16f(v, i>>2, i&3); }
 
 	// float* row(size_t i) { return x + 4*i; }
 	// float const* row(size_t i) const { return x + 4*i; }
 
 	// i is row/y, j is column/x
-	float operator()(int i, int j) const { return simd::impl::elem_16f(v, i, j); }
+	float STIR_SSE_CALL operator()(int i, int j) const { return simd::impl::elem_16f(v, i, j); }
 	// float operator[](int i, int j) const { return v.val[j][i]; }
 
-	matrix const& operator+=(matrix const& a);
-	matrix const& operator-=(matrix const& a);
-	matrix const& operator*=(matrix const& a);
-	matrix const& operator/=(matrix const& a);
+	matrix const& STIR_SSE_CALL operator+=(matrix const& a);
+	matrix const& STIR_SSE_CALL operator-=(matrix const& a);
+	matrix const& STIR_SSE_CALL operator*=(matrix const& a);
+	matrix const& STIR_SSE_CALL operator/=(matrix const& a);
 
-	matrix const& operator+=(float k);
-	matrix const& operator-=(float k);
-	matrix const& operator*=(float k);
-	matrix const& operator/=(float k);
+	matrix const& STIR_SSE_CALL operator+=(float k);
+	matrix const& STIR_SSE_CALL operator-=(float k);
+	matrix const& STIR_SSE_CALL operator*=(float k);
+	matrix const& STIR_SSE_CALL operator/=(float k);
 
-	static matrix identity()
+	static matrix STIR_SSE_CALL identity()
 	{
 		return matrix(
 			1, 0, 0, 0,
@@ -198,7 +198,7 @@ struct matrix33 {
 		v.val[2] = simd::impl::load_3f(p + 6);
 	}
 
-	float operator()(int i, int j) const { return simd::impl::elem_12f(v, i, j); }
+	float STIR_SSE_CALL operator()(int i, int j) const { return simd::impl::elem_12f(v, i, j); }
 };
 
 } // stir

@@ -10,9 +10,16 @@ math_test = executable('math_tests',
     dependencies: [stir_dep, doctest_dep, fmt_dep]
 )
 
+glm_simd_defs = [
+  '-DGLM_FORCE_INTRINSICS',
+  #'-DGLM_FORCE_SSE41',
+  '-DGLM_FORCE_DEFAULT_ALIGNED_GENTYPES'
+]
+
 executable('bench',
   ['benchmark.cpp', 'math.benchmark.cpp'],
-  dependencies: [stir_dep, nanobench_dep, doctest_dep, glm_dep]
+  dependencies: [stir_dep, nanobench_dep, doctest_dep, glm_dep],
+  cpp_args: glm_simd_defs
 )
 
 test('stir math test', math_test)

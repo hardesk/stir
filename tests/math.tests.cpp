@@ -77,7 +77,7 @@ quat __attribute__((noinline)) norm_q(quat& a)
 
 struct f4_t {
     static f4_t decompose(simd::impl::F4 a) {
-        return (f4_t){
+        return f4_t{
             simd::impl::elem_4f(a, 0),
             simd::impl::elem_4f(a, 1),
             simd::impl::elem_4f(a, 2),
@@ -91,7 +91,7 @@ struct Approx1 {
     T m_value;
     Approx1(T a) : m_value(a) {}
     bool operator==(T const& a) {
-        auto [x,y,z,w] = (f4_t){ a[0], a[1], a[2], a[3] };//f4_t::decompose(a.v);
+        auto [x,y,z,w] = f4_t{ a[0], a[1], a[2], a[3] };//f4_t::decompose(a.v);
         doctest::Approx xx[4] = {m_value[0], m_value[1], m_value[2], m_value[3]};
         return x == xx[0] && y == xx[1] && z == xx[2] && w == xx[3];
     }
@@ -127,12 +127,14 @@ TEST_CASE("quat")
     quat q1(1,0,0,0);
     quat q11(1,1,1,1);
     quat q_i = quat::identity();
-    quat q = from_axis_angle(vec3(0.5f,2.0f,1.0f), 3.1415f/2);
-    vec3 naxis = vec3(0.218218f, 0.872872f, 0.436436f);
+    quat q = from_axis_angle(vec3(0.5f,2.0f,1.0f), pi/2);
+    quat q_axisangle = quat(0.154303f, 0.617213f, 0.308607f, 0.707106f); // calculated with external calculator
+    vec3 naxis = vec3(0.218218f, 0.872872f, 0.436436f); // precalculated vector axis
     quat q_c = quat(1.0f, 2.0f, 3.0f, 4.0f);
     quat q_n = quat(0.1825742f, 0.3651484f, 0.5477226f, 0.7302967f);
 
     SUBCASE("axis") {
+        CHECK(q == ApproxQuat(q_axisangle));
         CHECK(q.axis() == ApproxV3(naxis));
         CHECK(q.scalar() == Approx(0.7071068f));
     }
@@ -173,7 +175,7 @@ TEST_CASE("quat")
         CHECK(ref::normalize(q11) == ApproxQuat(q0_5));//quat(0.5,0.5,0.5,0.5));
         CHECK(q0_5 == ref::normalize(q11));//quat(0.5,0.5,0.5,0.5));
 
-        CHECK(length(q_n - q_n) == 0);
+        CHECK(length(q_n - q_n) == Approx(0));
         CHECK(length(normalize(q_n) - q_n) == Approx(0));
         CHECK(length(normalize(q_c) - q_n) == Approx(0));
 
@@ -196,11 +198,7 @@ TEST_CASE("quat")
         vec3 x_rotated = rot(q_z90, x_axis);
         // Should rotate x-axis toward y-axis
         CHECK(x_rotated == ApproxV3(vec3(0.0f, 1.0f, 0.0f)));
-        // CHECK(x_rotated[0] == Approx(0.0f));
-        // CHECK(x_rotated[1] == Approx(1.0f));
-        // CHECK(x_rotated[2] == Approx(0.0f));
-        // CHECK(x_rotated[3] == Approx(0.0f));
-
+ 
         // 180 degree rotation around x-axis
         quat q_x180 = from_axis_angle(vec3(1.0f, 0.0f, 0.0f), 3.14159f);
         vec3 y_axis(0.0f, 1.0f, 0.0f);
@@ -219,36 +217,11 @@ TEST_CASE("quat")
     //norm_q(q);
     //printf("%d", &q);
 }
-/**/
-#if 0
-Vector4 add_2(Vector4 const& a, Vector4 const& b)
-{
-    return a + b;
-}
 
-bool mul_2(Vector4 const& a)
-{
-    Matrix mi = Matrix::identity();
-    Vector4 b = mul(a, mi);
-    Vector4 c = add_2(a, b);
-    return c == Vector4(2,4,6,8);
-}
-
-
-TEST_CASE("mul")
-{
-    Matrix mi = Matrix::identity();
-    Vector4 v = {1,2,3,4};
-
-    Vector4 v1 = mul(v, mi);
-    CHECK(v == Vector4(1,2,3,4));
-}
-#endif
 
 TEST_CASE("vec2")
 {
     vec2 v(1,2);
-
 }
 
 

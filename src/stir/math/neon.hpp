@@ -69,7 +69,6 @@ inline void store_transpose(float* p, matrix const& a) { return impl::store_tran
 inline vec4 mul(matrix const& m, vec4 const& v) { return vec4{ impl::mul4(m.v, v.v) }; }
 
 inline vec3 xform_pos(matrix const& m, vec3 const& v) { return vec3{ impl::to_vec3( impl::mul4(m.v, impl::assign_4f_3f_1f(v.v,1.0f)) ) }; }
-inline vec4 xform_pos4(matrix const& m, vec3 const& v) { return vec4{ impl::mul4(m.v, impl::assign_4f_3f_1f(v.v,1.0f)) }; }
 inline vec3 xform_dir(matrix const& m, vec3 const& v) { return vec3{ impl::mul3(m.v, v.v) }; }
 
 inline matrix33 mul(matrix33 const& a, matrix33 const& b) { return matrix33{ impl::mul33(a.v, b.v) }; }

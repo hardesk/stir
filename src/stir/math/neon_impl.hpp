@@ -240,9 +240,9 @@ inline float32x4_t cross(float32x4_t a, float32x4_t b) {
 // quaternion
 inline float32x4_t axis_quat(float32x4_t q) {
     float32x4_t oneminussq = vsubq_f32(vdupq_n_f32(1.0f), vdupq_laneq_f32(vmulq_f32(q, q), 3));
-    float32x4_t rsq = rsqrt<1>(oneminussq);
     if (vgetq_lane_f32(oneminussq,0) < 1e-6f)
         return float32x4_t{1.0f, 0.0f, 0.0f, 0.0f};
+    float32x4_t rsq = rsqrt<1>(oneminussq);
     float32x4_t axis = vmulq_f32(q, rsq);
     return vsetq_lane_f32(0, axis, 3);
 }
@@ -464,12 +464,9 @@ inline float32x4x3_t mul33(float32x4x3_t a, float32x4x3_t b)
 // matrix
 inline float32x4_t mul3(float32x4x4_t m, float32x4_t v)
 {
-	float32x4_t r;
-    float32x4_t v1 = vsetq_lane_f32(1.0f, v, 3);
-    r = vmulq_laneq_f32(   m.val[0], v1, 0);
-    r = vmlaq_laneq_f32(r, m.val[1], v1, 1);
-    r = vmlaq_laneq_f32(r, m.val[2], v1, 2);
-    // r = vmlaq_laneq_f32(r, m.val[3], v1, 3);
+	float32x4_t r = vmulq_laneq_f32(   m.val[0], v, 0);
+                r = vmlaq_laneq_f32(r, m.val[1], v, 1);
+                r = vmlaq_laneq_f32(r, m.val[2], v, 2);
     return r;
 }
 

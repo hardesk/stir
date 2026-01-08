@@ -87,7 +87,6 @@ quat mul(quat const& a, quat const& b);
 vec4 mul(matrix const& a, vec4 const& v);
 
 vec3 xform_pos(matrix const& m, vec3 const& v);
-vec4 xform_pos4(matrix const& m, vec3 const& v);
 vec3 xform_dir(matrix const& m, vec3 const& v);
 
 inline vec3 rot(quat const& q, vec3 const& v) {

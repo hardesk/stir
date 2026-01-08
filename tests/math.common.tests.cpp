@@ -58,6 +58,7 @@ TEST_CASE("common functions: operators, dot/cross, normalize, quat, matrix") {
         quat qc = conj(q);
         // conj should flip vector part sign
         CHECK(qc[0] == doctest::Approx(-1.0f));
+        CHECK(qc[1] == doctest::Approx(-2.0f));
         CHECK(qc.scalar() == doctest::Approx(4.0f));
         CHECK(qc[3] == doctest::Approx(4.0f));
 
@@ -101,8 +102,5 @@ TEST_CASE("common functions: operators, dot/cross, normalize, quat, matrix") {
         CHECK(d_out[0] == doctest::Approx(dir[0]));
         CHECK(d_out[1] == doctest::Approx(dir[1]));
         CHECK(d_out[2] == doctest::Approx(dir[2]));
-
-        vec4 pvout = xform_pos4(T, p);
-        CHECK(pvout[0] == doctest::Approx(1.0f + 10.0f));
     }
 }

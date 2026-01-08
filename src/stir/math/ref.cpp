@@ -51,15 +51,6 @@ vec3 xform_pos(matrix const& m, vec3 const& v)
 	return vec3(v0, v1, v2);
 }
 
-vec4 xform_pos4(matrix const& m, vec3 const& v)
-{
-	float v0 = m(0,0)*v[0] + m(0,1)*v[1] + m(0,2)*v[2] + m(0,3);
-	float v1 = m(1,0)*v[0] + m(1,1)*v[1] + m(1,2)*v[2] + m(1,3);
-	float v2 = m(2,0)*v[0] + m(2,1)*v[1] + m(2,2)*v[2] + m(2,3);
-	float v3 = m(3,0)*v[0] + m(3,1)*v[1] + m(3,2)*v[2] + m(3,3);
-	return vec4(v0, v1, v2, v3);
-}
-
 vec3 xform_dir(matrix const& m, vec3 const& v)
 {
 	float v0 = m(0,0)*v[0] + m(0,1)*v[1] + m(0,2)*v[2];
@@ -75,7 +66,6 @@ vec3 mul(matrix33 const& m, vec3 const& v)
 	float v2 = m(2,0)*v[0] + m(2,1)*v[1] + m(2,2)*v[2];
 	return vec3(v0, v1, v2);
 }
-
 
 matrix rot_matrix(quat const& q)
 {

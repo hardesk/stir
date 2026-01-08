@@ -6,6 +6,7 @@
 #include <stir/math/ref.hpp>
 
 #include <glm/glm.hpp>
+#include <glm/ext/quaternion_float.hpp>
 
 namespace bench = ankerl::nanobench;
 using namespace stir;
@@ -100,17 +101,29 @@ glm::mat4 toglm(matrix m) {
     return r;
 }
 
+glm::vec3 toglm(vec3 v) { return glm::vec3(v[0], v[1], v[2]); }
+glm::vec4 toglm(vec4 v) { return glm::vec4(v[0], v[1], v[2], v[3]); }
+glm::quat toglm(quat q) { return glm::quat(q[3], q[0], q[1], q[2]); }
+
 TEST_CASE("math matrix benchmark")
 {
 	matrix m1(1,2,3,4, 5,6,7,8, 9,0,1,2, 3,4,5,6);
 	matrix m2(1,1,2,2, 3,3,4,4, 5,5,6,6, 7,7,8,8);
 	matrix m(rF,rF,rF,rF, rF,rF,rF,rF, rF,rF,rF,rF,rF,rF,rF,rF);
 	matrix mX(rF,rF,rF,rF, rF,rF,rF,rF, rF,rF,rF,rF,rF,rF,rF,rF);
+	vec4 v4(rF,rF,rF,rF);
+	vec4 v42(rF,rF,rF,rF);
+	vec3 v3(rF,rF,rF);
+	quat qa = from_axis_angle(vec3(rF,rF,rF),rF);
 
     glm::mat4  glm_m1 = toglm(m1);
     glm::mat4  glm_m2 = toglm(m2);
     glm::mat4  glm_m = toglm(m);
     glm::mat4  glm_mX = toglm(m);
+    glm::quat  glm_qa = toglm(qa);
+    glm::vec4  glm_v4 = toglm(v4);
+    glm::vec4  glm_v42 = toglm(v4);
+    glm::vec3  glm_v3 = toglm(v3);
 
 	ankerl::nanobench::Bench b;
     b.title("matrix math")
@@ -134,6 +147,20 @@ TEST_CASE("math matrix benchmark")
 	// b.run("matrix transpose (sse)",		[&] { matrix mx=sse::transpose(m); bench::doNotOptimizeAway(mx); });
 	// b.run("matrix transpose (xsimd)",	[&] { matrix mx=simd_xsimd::transpose(m); bench::doNotOptimizeAway(mx); });
 	// b.run("matrix transpose (mipp)",	[&] { matrix mx=simd_mipp::transpose(m); bench::doNotOptimizeAway(mx); });
+
+	b.run("some math (glm)",	[&] {
+		glm::vec4 vx = glm_m * glm_v4 - glm_v42*3.0f;
+		glm::vec4 vy = glm::vec4(glm_qa * glm_v3 + glm_v3, 2) + glm_v4*7.0f;
+		float x = glm::dot(vx, vy);
+		bench::doNotOptimizeAway(x); });
+
+	b.run("some math",	[&] {
+		vec4 vx = mul(m, v4) - v42*3.0f;
+		vec4 vy = vec4(rot(qa, v3) + v3, 2) + v4*7.0f;
+		float x = dot(vx, vy);
+		bench::doNotOptimizeAway(x); });
+
+
 
 	// matrix q(1,0,2,-5,
 	// 		 2,5,0,3,

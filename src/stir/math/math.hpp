@@ -10,8 +10,10 @@
 #define STIR_MATH_MIPP 1
 #define STIR_MATH_XSIMD 2
 #define STIR_MATH_NEON 3
+#define STIR_MATH_SSE 4
 // #define STIR_MATH_MODE STIR_MATH_REF
-#define STIR_MATH_MODE STIR_MATH_NEON
+//#define STIR_MATH_MODE STIR_MATH_NEON
+#define STIR_MATH_MODE STIR_MATH_SSE
 
 #if defined(__x86_64)
 #define STIR_MATH_X64 1
@@ -28,6 +30,11 @@
 namespace stir::simd {
     using namespace neon;
 }
+#elif STIR_MATH_MODE == STIR_MATH_SSE
+#include "sse_prefix.hpp"
+namespace stir::simd {
+    using namespace sse;
+}
 #elif STIR_MATH_MODE == STIR_MATH_REF
 #include "ref_prefix.hpp"
 namespace stir::simd {
@@ -37,9 +44,9 @@ namespace stir::simd {
 #include "mipp_prefix.hpp"
 #endif
 
-namespace stir
-{
-}
+#ifndef STIR_SSE_CALL
+#define STIR_SSE_CALL
+#endif
 
 // define our types, it uses the simd types defined in prefix file
 #include "defs.hpp"
@@ -52,6 +59,9 @@ namespace stir
 //#include "math_mipp.hpp"
 #elif STIR_MATH_MODE == STIR_MATH_MIPP
 #include "math_xsimd.hpp"
+#elif STIR_MATH_MODE == STIR_MATH_SSE
+#include "sse.hpp"
+namespace stir::simd { using namespace stir::sse; }
 #elif STIR_MATH_MODE == STIR_MATH_NEON
 #include "neon.hpp"
 namespace stir::simd { using namespace stir::neon; }
